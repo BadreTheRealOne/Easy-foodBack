@@ -6,23 +6,11 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'https://easy-food-front-tau.vercel.app',
-  ];
-
   app.enableCors({
-    origin: (origin, callback) => {
-      // origin undefined => Postman/curl (pas un navigateur)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-
-      return callback(new Error(`CORS blocked for origin: ${origin}`), false);
-    },
+    origin: ['https://easy-food-front-tau.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false, // ✅ IMPORTANT : tu utilises Bearer token, pas cookies
+    credentials: true,
   });
 
   app.useGlobalPipes(
@@ -32,7 +20,8 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT || 3000);
 }
+
 
 void bootstrap();
