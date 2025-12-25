@@ -4,6 +4,9 @@ import { CreateRecipeDto } from 'src/auth/dto/create-recipe.dto';
 
 @Injectable()
 export class RecipesService {
+  findAll(arg0: number, arg1: number) {
+    throw new Error('Method not implemented.');
+  }
   constructor(private prisma: PrismaService) {}
 
   create(userId: string, dto: CreateRecipeDto) {

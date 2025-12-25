@@ -7,7 +7,18 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: true, // ⬅️ IMPORTANT
+    origin: (origin, callback) => {
+      const allowedOrigins = ['https://easy-food-front-tau.vercel.app'];
+
+      // requêtes sans origin (Postman, mobile, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   });
 
@@ -20,6 +31,5 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT || 3000);
 }
-
 
 void bootstrap();
