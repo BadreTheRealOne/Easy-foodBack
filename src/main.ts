@@ -20,8 +20,11 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  const port = process.env.PORT;
+  if (!port) {
+    throw new Error('PORT is not defined');
+  }
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(port);
 }
-
 void bootstrap();
