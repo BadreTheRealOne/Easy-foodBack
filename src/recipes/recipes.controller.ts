@@ -19,10 +19,7 @@ export class RecipesController {
 
   // ✅ PUBLIC : liste paginée
   @Get()
-  findAll(
-    @Query('page') page = '1',
-    @Query('limit') limit = '10',
-  ) {
+  findAll(@Query('page') page = '1', @Query('limit') limit = '10') {
     return this.recipesService.findAllPaginated(Number(page), Number(limit));
   }
 
