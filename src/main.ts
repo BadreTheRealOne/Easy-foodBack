@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // ✅ CORS (OBLIGATOIRE POUR LE FRONT)
   app.enableCors({
-    origin: '*',
+    origin: ['https://easy-food-front-tau.vercel.app'],
     credentials: true,
   });
 
