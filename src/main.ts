@@ -25,6 +25,6 @@ async function bootstrap() {
     throw new Error('PORT is not defined');
   }
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 void bootstrap();
