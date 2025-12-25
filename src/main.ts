@@ -1,3 +1,4 @@
+// main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -5,26 +6,33 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ CORS (OBLIGATOIRE POUR LE FRONT)
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'https://easy-food-front-tau.vercel.app',
+  ];
+
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://easy-food-front-tau.vercel.app'],
+    origin: (origin, callback) => {
+      // origin undefined => Postman/curl (pas un navigateur)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`), false);
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    credentials: false, // ✅ IMPORTANT : tu utilises Bearer token, pas cookies
   });
 
-  // ✅ Validation globale (tu l'avais déjà, très bien)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
     }),
   );
-  const port = process.env.PORT;
-  if (!port) {
-    throw new Error('PORT is not defined');
-  }
 
-  await app.listen(port, '0.0.0.0');
+  await app.listen(process.env.PORT ?? 3000);
 }
+
 void bootstrap();
