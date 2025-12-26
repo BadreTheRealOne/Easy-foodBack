@@ -7,8 +7,8 @@ async function bootstrap() {
 
   const server = app.getHttpAdapter().getInstance();
 
-  // 🔥 FORCE la réponse aux OPTIONS (AVANT Nest)
-  server.options('*', (req, res) => {
+  // ✅ FIX EXPRESS + OPTIONS (IMPORTANT)
+  server.options('/*', (req, res) => {
     res.header(
       'Access-Control-Allow-Origin',
       'https://easy-food-front-tau.vercel.app',
