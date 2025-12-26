@@ -5,26 +5,15 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const server = app.getHttpAdapter().getInstance();
-
-  // ✅ FIX EXPRESS + OPTIONS (IMPORTANT)
-  server.options('/*', (req, res) => {
-    res.header(
-      'Access-Control-Allow-Origin',
-      'https://easy-food-front-tau.vercel.app',
-    );
-    res.header(
-      'Access-Control-Allow-Methods',
-      'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    );
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.sendStatus(204);
-  });
+  // Remove the explicit server.options handler.
+  // const server = app.getHttpAdapter().getInstance();
+  // server.options('/*', (req, res) => { ... }); // <-- DELETE THIS BLOCK
 
   app.enableCors({
-    origin: 'https://easy-food-front-tau.vercel.app',
-    credentials: true,
+    origin: 'https://easy-food-front-tau.vercel.app', // Your frontend origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include all methods your API uses
+    allowedHeaders: 'Content-Type, Authorization', // Include all headers your frontend sends (e.g., Content-Type, Authorization, X-Requested-With)
+    credentials: true, // If your frontend sends cookies or expects them
   });
 
   app.useGlobalPipes(
