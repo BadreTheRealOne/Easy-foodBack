@@ -1,37 +1,39 @@
-// main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
+import * as express from 'express';
 
 async function bootstrap() {
-  const server = express();
+  const app = await NestFactory.create(AppModule);
 
-  // 🔥 FORCER LES HEADERS CORS AVANT NEST
-  server.use((req, res, next) => {
-    res.header(
-      'Access-Control-Allow-Origin',
-      'https://easy-food-front-tau.vercel.app',
-    );
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-    );
-    res.header(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-    );
+  app.use(express.json());
 
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(204);
-    }
+  app.use(
+    (
+      req: { method: string },
+      res: {
+        header: (arg0: string, arg1: string) => void;
+        sendStatus: (arg0: number) => any;
+      },
+      next: () => void,
+    ) => {
+      res.header(
+        'Access-Control-Allow-Origin',
+        'https://easy-food-front-tau.vercel.app',
+      );
+      res.header(
+        'Access-Control-Allow-Methods',
+        'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+      );
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.header('Access-Control-Allow-Credentials', 'true');
 
-    next();
-  });
-
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+      if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+      }
+      next();
+    },
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
