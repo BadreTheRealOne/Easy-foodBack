@@ -1,12 +1,17 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateRecipeDto } from 'src/auth/dto/create-recipe.dto';
 
 @Injectable()
 export class RecipesService {
-  findAll(arg0: number, arg1: number) {
-    throw new Error('Method not implemented.');
+  findAll(page: number, limit: number) {
+    return this.findAllPaginated(page, limit);
   }
+
   constructor(private prisma: PrismaService) {}
 
   create(userId: string, dto: CreateRecipeDto) {
