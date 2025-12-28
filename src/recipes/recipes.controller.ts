@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import {
   Controller,
   Post,
@@ -8,35 +12,63 @@ import {
   Delete,
   Param,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { CreateRecipeDto } from 'src/auth/dto/create-recipe.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RecipesService } from './recipes.service';
+import { CreateRecipeDto } from 'src/auth/dto/create-recipe.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('recipes')
 export class RecipesController {
   constructor(private recipesService: RecipesService) {}
 
-  // ✅ PUBLIC : liste paginée
   @Get()
   findAllRecipes(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.recipesService.findAll(Number(page) || 1, Number(limit) || 10);
   }
 
-  // ✅ PUBLIC : détail
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.recipesService.findOne(id);
   }
 
-  // 🔒 PROTÉGÉ : créer
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Req() req: any, @Body() dto: CreateRecipeDto) {
-    return this.recipesService.create(req.user.userId, dto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (_req, file, cb) => {
+          const filename = Date.now() + extname(file.originalname);
+          cb(null, filename);
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // ✅ 5MB MAX
+      },
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return cb(new Error('Only images allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  create(
+    @Req() req: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateRecipeDto,
+  ) {
+    return this.recipesService.create(req.user.userId, {
+      ...dto,
+      imageUrl: file ? `/uploads/${file.filename}` : undefined,
+    });
   }
 
-  // 🔒 PROTÉGÉ : supprimer (seulement si owner)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Req() req: any, @Param('id') recipeId: string) {

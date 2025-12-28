@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateRecipeDto {
   @IsString()
@@ -13,10 +13,10 @@ export class CreateRecipeDto {
   @IsString()
   steps: string;
 
+  @IsUUID()
+  categoryId: string;
+
   @IsOptional()
   @IsString()
   imageUrl?: string;
-
-  @IsUUID()
-  categoryId: string;
 }
